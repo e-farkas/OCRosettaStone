@@ -23,7 +23,7 @@ while true; do
         if [ "$camera_button" = true ] ; then
           STATE="$S1"
         fi
-        if [ "$power_button" = ture ];
+        if [ "$power_button" = true ];
         then
           STATE="$S8"
         fi
@@ -35,7 +35,7 @@ while true; do
         then
           STATE="$S2"
         fi
-        if [ "$power_button" = ture ] ;
+        if [ "$power_button" = true ] ;
         then
           STATE="$S8"
         fi
@@ -47,7 +47,7 @@ while true; do
         then
           STATE="$S3"
         fi
-        if [ "$power_button" = ture ] ;
+        if [ "$power_button" = true ] ;
         then
           STATE="$S8"
         fi
@@ -71,7 +71,7 @@ while true; do
         then
           STATE="$S6"
         fi
-        if [ "$power_button" = ture ] ;
+        if [ "$power_button" = true ] ;
         then
           STATE="$S8"
         fi
