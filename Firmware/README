@@ -1,0 +1,2 @@
+11/18 - updated the state machine and tested it can reach every state and responds to change in bool vars that control state change. 
+	Tested small cpp with printing hello world from one state. 

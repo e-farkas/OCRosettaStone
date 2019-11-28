@@ -153,7 +153,11 @@ steps_per_epoch = len(input_tensor_train)//BATCH_SIZE
 embedding_dim = 256
 units = 1024
 vocab_inp_size = len(inp_lang.word_index)+1
+print("vocan inp size")
+print(vocab_inp_size)
 vocab_tar_size = len(targ_lang.word_index)+1
+print("vocan tar size")
+print(vocab_tar_size)
 
 dataset = tf.data.Dataset.from_tensor_slices((input_tensor_train, target_tensor_train)).shuffle(BUFFER_SIZE)
 dataset = dataset.batch(BATCH_SIZE, drop_remainder=True)
@@ -337,27 +341,27 @@ def train_step(inp, targ, enc_hidden):
   
 EPOCHS = 10
 
-for epoch in range(EPOCHS):
-  start = time.time()
+# for epoch in range(EPOCHS):
+#   start = time.time()
 
-  enc_hidden = encoder.initialize_hidden_state()
-  total_loss = 0
+#   enc_hidden = encoder.initialize_hidden_state()
+#   total_loss = 0
 
-  for (batch, (inp, targ)) in enumerate(dataset.take(steps_per_epoch)):
-    batch_loss = train_step(inp, targ, enc_hidden)
-    total_loss += batch_loss
+#   for (batch, (inp, targ)) in enumerate(dataset.take(steps_per_epoch)):
+#     batch_loss = train_step(inp, targ, enc_hidden)
+#     total_loss += batch_loss
 
-    if batch % 100 == 0:
-        print('Epoch {} Batch {} Loss {:.4f}'.format(epoch + 1,
-                                                     batch,
-                                                     batch_loss.numpy()))
-  # saving (checkpoint) the model every 2 epochs
-  if (epoch + 1) % 2 == 0:
-    checkpoint.save(file_prefix = checkpoint_prefix)
+#     if batch % 100 == 0:
+#         print('Epoch {} Batch {} Loss {:.4f}'.format(epoch + 1,
+#                                                      batch,
+#                                                      batch_loss.numpy()))
+#   # saving (checkpoint) the model every 2 epochs
+#   if (epoch + 1) % 2 == 0:
+#     checkpoint.save(file_prefix = checkpoint_prefix)
 
-  print('Epoch {} Loss {:.4f}'.format(epoch + 1,
-                                      total_loss / steps_per_epoch))
-  print('Time taken for 1 epoch {} sec\n'.format(time.time() - start))
+#   print('Epoch {} Loss {:.4f}'.format(epoch + 1,
+#                                       total_loss / steps_per_epoch))
+#   print('Time taken for 1 epoch {} sec\n'.format(time.time() - start))
   
 ###############################################################################
 ###############################################################################
@@ -430,12 +434,12 @@ def translate(sentence):
     print('Input: %s' % (sentence))
     print('Predicted translation: {}'.format(result))
 
-    attention_plot = attention_plot[:len(result.split(' ')), :len(sentence.split(' '))]
-    plot_attention(attention_plot, sentence.split(' '), result.split(' '))
+    #attention_plot = attention_plot[:len(result.split(' ')), :len(sentence.split(' '))]
+    #plot_attention(attention_plot, sentence.split(' '), result.split(' '))
     
 ############################################################################### 
 # restoring the latest checkpoint in checkpoint_dir
-checkpoint.restore(tf.train.latest_checkpoint(checkpoint_dir))
+checkpoint.restore(tf.train.latest_checkpoint('../../languageModels/training_checkpoints60k'))
 
 ###############################################################################
 # Testing translate
