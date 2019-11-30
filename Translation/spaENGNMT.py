@@ -26,11 +26,14 @@ import time
 
 ###############################################################################
 # Downloading files ----- The files are already in the directory
-path_to_zip = tf.keras.utils.get_file(
-    'spa-eng.zip', origin='http://storage.googleapis.com/download.tensorflow.org/data/spa-eng.zip',
-    extract=True)
+# path_to_zip = tf.keras.utils.get_file(
+#    'spa-eng.zip', origin='http://storage.googleapis.com/download.tensorflow.org/data/spa-eng.zip',
+#    extract=True)
 
-path_to_file = os.path.dirname(path_to_zip)+"/spa-eng/spa.txt"
+path_to_file = "/Users/oliverthurn/.keras/datasets/spa-eng/spa.txt"
+# print(path_to_zip)
+print(path_to_file)
+#path_to_file = "spa.txt"
 
 ###############################################################################
 # Converts the unicode file to ascii
@@ -424,7 +427,7 @@ def plot_attention(attention, sentence, predicted_sentence):
     ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
 
-    plt.show()
+    #plt.show()
     
 ###############################################################################
     
@@ -434,12 +437,13 @@ def translate(sentence):
     print('Input: %s' % (sentence))
     print('Predicted translation: {}'.format(result))
 
-    #attention_plot = attention_plot[:len(result.split(' ')), :len(sentence.split(' '))]
-    #plot_attention(attention_plot, sentence.split(' '), result.split(' '))
+    attention_plot = attention_plot[:len(result.split(' ')), :len(sentence.split(' '))]
+    plot_attention(attention_plot, sentence.split(' '), result.split(' '))
     
 ############################################################################### 
 # restoring the latest checkpoint in checkpoint_dir
-checkpoint.restore(tf.train.latest_checkpoint('../../languageModels/training_checkpoints60k'))
+checkpoint_dir = '/training_checkpoints100k'
+checkpoint.restore(tf.train.latest_checkpoint(checkpoint_dir))
 
 ###############################################################################
 # Testing translate
