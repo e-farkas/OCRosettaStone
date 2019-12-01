@@ -30,9 +30,9 @@ disp = ST7735.ST7735(
     invert=False
 )
 
-def initLCD():
-
-
+backlight = False
+backlight_count = 0
+disp.set_backlight(0)
 camera = PiCamera()
 try:
     disp.begin()
@@ -56,9 +56,21 @@ try:
             #buttonPressed = True
         if powerButton.is_pressed:
             print("power button pin 6")
+
             #buttonPressed = True
+            print(time.time()-backlight_count)
+            print(backlight_count)
+            if ((time.time() - backlight_count) > 5) and (backlight_count > 0):
+                print("SHUTDOWN")
+            if backlight_count == 0: #if button is held, dont change screen
+                backlight_count = time.time()
+                disp.set_backlight(backlight)
+                backlight = not backlight
+        else:
+            backlight_count = 0
 
         rawCapture.truncate(0)
 
 finally:
     camera.close()
+    disp.set_backlight(0)
