@@ -1,11 +1,19 @@
 from picamera.array import PiRGBArray
 from picamera import PiCamera
-#import time
+import time
 import numpy as np
+from gpiozero import Button
 
 from PIL import Image
 import sys
-import ST7735 as ST7735
+import ST7735
+
+
+cButtonPin = 13
+pButtonPin = 6
+
+cameraButton = Button(cButtonPin)
+powerButton = Button(pButtonPin)
 
 disp = ST7735.ST7735(
     port = 0,
@@ -22,17 +30,35 @@ disp = ST7735.ST7735(
     invert=False
 )
 
-disp.begin()
+def initLCD():
+
 
 camera = PiCamera()
-camera.resolution = (128, 128)
-camera.framerate = 32
-rawCapture = PiRGBArray(camera, size(128, 128))
+try:
+    disp.begin()
 
-for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-    image = frame.array
-    img = Image.fromArray(image, "RGB")
+    camera.resolution = (128, 128)
+    camera.framerate = 32
+    rawCapture = PiRGBArray(camera, size=(128, 128))
 
-    disp.display(img)
+    for frame in camera.capture_continuous(rawCapture, format="rgb", use_video_port=True):
+        image = frame.array
+        img = Image.fromarray(image, "RGB")
 
-    rawCapture.truncate(0)
+        disp.display(img)
+
+        # check if button is pressed
+        if cameraButton.is_pressed:
+            camera.capture("/home/pi/OCRosettaStone/Firmware/image.jpg")
+            disp.display(img)
+            time.sleep(5)
+            print("camera button pin 16")
+            #buttonPressed = True
+        if powerButton.is_pressed:
+            print("power button pin 6")
+            #buttonPressed = True
+
+        rawCapture.truncate(0)
+
+finally:
+    camera.close()
