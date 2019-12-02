@@ -17,6 +17,8 @@ HEIGHT = 128
 BAUDRATE = 24000000
 FRAMERATE = 32
 
+SHUTDOWN_THRESH_S = 5
+
 # PIN DEFINITIONS
 # buttons
 cameraButtonPin = 13
@@ -59,6 +61,7 @@ def initLCD():
         invert=False
     )
     disp.begin()
+    #disp.set_backlight(False)
     return disp
 
 def initCamera():
@@ -68,67 +71,83 @@ def initCamera():
     return camera
 
 
-try:
-
-    rawCapture = PiRGBArray(camera, size=(128, 128))
-
-    for frame in camera.capture_continuous(rawCapture, format="rgb", use_video_port=True):
-        image = frame.array
-        img = Image.fromarray(image, "RGB")
-
-        disp.display(img)
-
-        # check if button is pressed
-        if cameraButton.is_pressed:
-            camera.capture("/home/pi/OCRosettaStone/Firmware/image.jpg")
-            disp.display(img)
-            time.sleep(5)
-            print("camera button pin 16")
-            #buttonPressed = True
-        if powerButton.is_pressed:
-            print("power button pin 6")
-            #buttonPressed = True
-
-        rawCapture.truncate(0)
-
-finally:
-    camera.close()
 
 
-
-
-
-
-if __name__ = "__main__":
+if __name__ == "__main__":
 
     # initialize lcd, camera, buttons
-    lcd = initLCD()
+    disp = initLCD()
     cameraButton = Button(cameraButtonPin)
     powerButton = Button(powerButtonPin)
     camera = initCamera()
+    rawCapture = PiRGBArray(camera, size=(WIDTH, HEIGHT))
 
     #start state machine
     state = WELCOME
+    powerButtonHoldTime_s = 0
+    backlight = False
+    img = Image.new('RGB', (WIDTH,HEIGHT))
 
-    while(true):
+    while(True):
         if (state == WELCOME):
+            print("WELCOME")
+            #TODO: create welcome screen
+            state = SCREEN_ON
 
         elif (state == LOW_POWER):
+            print("LOW_POWER")
+            #state = LOW_POWER
+            #turn screen on
+            disp.set_backlight(False)
+            if (powerButton.is_pressed):
+                state = SCREEN_ON
 
         elif(state == SCREEN_ON):
+            print("SCREEN_ON")
+            disp.set_backlight(True)
+            for frame in camera.capture_continuous(rawCapture, format="rgb", use_video_port=True):
+                img = Image.fromarray(frame.array, "RGB")
+                disp.display(img)
+                #state = SCREEN_ON
+                rawCapture.truncate(0)
+
+                #capture image
+                if cameraButton.is_pressed:
+                    state = CAPTURE_IMAGE
+                #shutdown or turn screen on
+                if powerButton.is_pressed:
+                    if((time.time() - powerButtonHoldTime_s) > SHUTDOWN_THRESH_S) and (powerButtonHoldTime_s > 0):
+                        state = SHUTDOWN
+                    elif (powerButtonHoldTime_s == 0):  #change screen
+                        powerButtonHoldTime_s = time.time()
+                        state = LOW_POWER
+                else:
+                    powerButtonHoldTime_s = 0
+
+
 
         elif(state == CAPTURE_IMAGE):
+            print("CAPTURE_IMAGE")
+            camera.capture("/home/pi/OCRosettaStone/Firmware/image.jpg")
+            disp.display(img)
+            time.sleep(5)
+            state = SCREEN_ON
 
-        elif(state == RUN_OBJ_DET):
+        #elif(state == RUN_OBJ_DET):
 
-        elif(state == SHOW_DET_TEXT):
+        #elif(state == SHOW_DET_TEXT):
 
-        elif(state == RUN_TRANSLATION):
+        #elif(state == RUN_TRANSLATION):
 
-        elif(state == SHOW_TRANSLATION):
+        #elif(state == SHOW_TRANSLATION):
 
         elif(state == SHUTDOWN):
+            print("SHUTDOWN")
+            #TODO: create shutdown sequence
+            #NOTE: stutdown logic doesnt work rn so we never get here
 
+#finally:
+#    camera.close()
 
 
 
