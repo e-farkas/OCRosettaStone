@@ -59,7 +59,10 @@ for line in toTranslate:
         word = word.replace('\n', "")
         print(word)
         print("translation: ")
-        t = translation[word]
+        try:
+            t = translation[word]
+        except KeyError as identifier:
+            t = "?"
         outFile.write(t + " ")
         print(t)
     print(line)
