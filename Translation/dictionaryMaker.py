@@ -36,18 +36,19 @@ with open('spanish2english.tsv') as tsvfile:
             #print(spa)
             spanish.append(spa)
     
-    print(len(spanish))
-    print(len(enlgish))
+    #print(len(spanish))
+    #print(len(enlgish))
     end = len(spanish)
     for i in range(0, len(spanish)):
         translation[spanish[i]] = enlgish[i]
     
     
-    print(translation)
+    #print(translation)
     
 inFile = open(sys.argv[1])
 toTranslate = inFile.readlines()
 
+outFile = open('./translatedText.txt', "w")
 
 for line in toTranslate:
     words = line.split(' ')
@@ -59,6 +60,7 @@ for line in toTranslate:
         print(word)
         print("translation: ")
         t = translation[word]
+        outFile.write(t + " ")
         print(t)
     print(line)
 
