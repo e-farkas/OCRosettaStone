@@ -3,7 +3,7 @@ from picamera import PiCamera
 import time
 import numpy as np
 from gpiozero import Button     # for readding button pins
-
+import subprocess
 from PIL import Image
 import sys
 import ST7735                   # for lcd display
@@ -12,8 +12,8 @@ import subprocess
 # CONSTANTS
 
 #lcd/camera
-WIDTH = 128
-HEIGHT = 128
+WIDTH = 1024
+HEIGHT = 1024
 BAUDRATE = 24000000
 FRAMERATE = 32
 LCD_WIDTH = 128
@@ -36,7 +36,7 @@ WELCOME = 0
 LOW_POWER = 1
 SCREEN_ON = 2
 CAPTURE_IMAGE = 3
-RUN_OBJ_DET = 4
+RUN_OCR = 4
 SHOW_DET_TEXT = 5
 RUN_TRANSLATION = 6
 SHOW_TRANSLATION = 7
@@ -109,7 +109,7 @@ if __name__ == "__main__":
             disp.set_backlight(True)
             for frame in camera.capture_continuous(rawCapture, format="rgb", use_video_port=True):
                 img = Image.fromarray(frame.array, "RGB")
-                disp.display(img)
+                disp.display(img.resize((LCD_WIDTH, LCD_HEIGHT)))
                 rawCapture.truncate(0)
 
                 #capture image
@@ -133,13 +133,19 @@ if __name__ == "__main__":
             print("CAPTURE_IMAGE")
             camera.capture("/home/pi/OCRosettaStone/Firmware/image.jpg")
             disp.display(img)
-            time.sleep(5)
+            #time.sleep(5)
+            state = RUN_OCR
+
+        elif(state == RUN_OCR):
+            print("RUN_OCR")
+            subprocess.call(["tesseract", "image.jpg", "out"])
+            subprocess.call(["python", "../OCR/text_process.py", "out.txt"])
+            state = SHOW_DET_TEXT
+
+        elif(state == SHOW_DET_TEXT):
+            print("SHOW_DET_TEXT")
+            subprocess.call(["cat", "out.txt"])
             state = SCREEN_ON
-
-        #elif(state == RUN_OBJ_DET):
-
-        #elif(state == SHOW_DET_TEXT):
-
         #elif(state == RUN_TRANSLATION):
 
         #elif(state == SHOW_TRANSLATION):
