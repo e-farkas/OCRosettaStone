@@ -3,8 +3,9 @@ from picamera import PiCamera
 import time
 import numpy as np
 from gpiozero import Button     # for readding button pins
-import subprocess
 from PIL import Image
+from PIL import ImageDraw
+from PIL import ImageFont
 import sys
 import ST7735                   # for lcd display
 import subprocess
@@ -12,8 +13,8 @@ import subprocess
 # CONSTANTS
 
 #lcd/camera
-WIDTH = 1808
-HEIGHT = 1808
+WIDTH = 1024
+HEIGHT = 1024
 BAUDRATE = 24000000
 FRAMERATE = 32
 LCD_WIDTH = 128
@@ -63,7 +64,10 @@ def initLCD():
         invert=False
     )
     disp.begin()
-    #disp.set_backlight(False)
+    img = Image.new('RGB', (LCD_WIDTH, LCD_HEIGHT), color=(0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    disp.display(img)
+
     return disp
 
 def initCamera():
@@ -72,7 +76,42 @@ def initCamera():
     camera.framerate = FRAMERATE
     return camera
 
+def textWrap(disp, txt_file):
 
+    #The text to be displayed from
+    textFile = open(txt_file, "r")
+    text_to_display = textFile.read()
+    #print("letters in string: " + str(len(text_to_display)))
+
+    words = text_to_display.split("\n")
+
+    img = Image.new('RGB', (LCD_WIDTH, LCD_HEIGHT), color=(0, 0, 0))
+
+    draw = ImageDraw.Draw(img)
+
+    fontSize = 14 # font size also sets pixel distance for new line
+    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", fontSize)
+
+    size_x, size_y = draw.textsize(text_to_display, font)
+    #print("text size: " + str(size_x) + ", " + str(size_y))
+
+    charScreenWidth = 10 # maximum number of chars that fit horizontally
+    left = 5 # buffer on left
+    top = 10 # buffer on top
+    draw.rectangle((0, 0, 128, 128), (0, 0, 0))
+    ySpace = 0
+
+    for word in words:
+        wordIter = 0
+        while len(word[wordIter:]) > charScreenWidth:
+            draw.text((left,top + ySpace), word[wordIter:(wordIter + charScreenWidth)] + "-", font=font, fill=(255,0,0))
+            ySpace += fontSize
+            wordIter = wordIter + charScreenWidth
+        draw.text((left,top + ySpace), word[wordIter:], font=font, fill=(255,0,0))
+        ySpace += fontSize
+
+    disp.display(img)
+    time.sleep(0.1)
 
 
 if __name__ == "__main__":
@@ -86,14 +125,14 @@ if __name__ == "__main__":
 
     #start state machine
     state = WELCOME
-    backlight = False
     powerButtonHoldTime_s = 0
     img = Image.new('RGB', (WIDTH,HEIGHT))
 
     while(True):
         if (state == WELCOME):
             print("WELCOME")
-            subprocess.call(["python", "textWrap.py", "welcome.txt"])
+            disp.set_backlight(True)
+            textWrap(disp, "welcome.txt")
             time.sleep(10)
             state = SCREEN_ON
 
@@ -110,7 +149,8 @@ if __name__ == "__main__":
             disp.set_backlight(True)
             for frame in camera.capture_continuous(rawCapture, format="rgb", use_video_port=True):
                 img = Image.fromarray(frame.array, "RGB")
-                disp.display(img.resize((LCD_WIDTH, LCD_HEIGHT)))
+                img = img.resize((LCD_WIDTH, LCD_HEIGHT))
+                disp.display(img)
                 rawCapture.truncate(0)
 
                 #capture image
@@ -134,7 +174,6 @@ if __name__ == "__main__":
             print("CAPTURE_IMAGE")
             camera.capture("/home/pi/OCRosettaStone/Firmware/image.jpg")
             disp.display(img)
-            #time.sleep(5)
             state = RUN_OCR
 
         elif(state == RUN_OCR):
@@ -146,6 +185,8 @@ if __name__ == "__main__":
         elif(state == SHOW_DET_TEXT):
             print("SHOW_DET_TEXT")
             subprocess.call(["cat", "out.txt"])
+            textWrap(disp, "out.txt")
+            time.sleep(10)
             state = SCREEN_ON
         #elif(state == RUN_TRANSLATION):
 
@@ -153,8 +194,10 @@ if __name__ == "__main__":
 
         elif(state == SHUTDOWN):
             print("SHUTDOWN")
-            #TODO: create shutdown sequence
-            #NOTE: stutdown logic doesnt work rn so we never get here
+            disp.set_backlight(False)
+            camera.close()
+            subprocess.call(["sudo", "shutdown", "now"])
+            #TODO: shutdown from python
 
 #finally:
 #    camera.close()

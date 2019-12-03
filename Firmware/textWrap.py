@@ -40,24 +40,26 @@ img = Image.new('RGB', (WIDTH, HEIGHT), color=(0, 0, 0))
 
 draw = ImageDraw.Draw(img)
 
-font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 14)
+fontSize = 14 # font size also sets pixel distance for new line
+font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", fontSize)
 
 size_x, size_y = draw.textsize(text_to_display, font)
 print("text size: " + str(size_x) + ", " + str(size_y))
 
 charScreenWidth = 10 # maximum number of chars that fit horizontally
-maxRows = 6
+left = 5 # buffer on left
+top = 10 # buffer on top
 draw.rectangle((0, 0, 128, 128), (0, 0, 0))
 ySpace = 0
 
 for word in words:
     wordIter = 0
     while len(word[wordIter:]) > charScreenWidth:
-        draw.text((5,10 + ySpace), word[wordIter:(wordIter + charScreenWidth)] + "-", font=font, fill=(255,0,0))
-        ySpace += 14
+        draw.text((left,top + ySpace), word[wordIter:(wordIter + charScreenWidth)] + "-", font=font, fill=(255,0,0))
+        ySpace += fontSize
         wordIter = wordIter + charScreenWidth
-    draw.text((5,10 + ySpace), word[wordIter:], font=font, fill=(255,0,0))
-    ySpace += 14
+    draw.text((left,top + ySpace), word[wordIter:], font=font, fill=(255,0,0))
+    ySpace += fontSize
 
 disp.display(img)
 time.sleep(0.1)
