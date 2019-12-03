@@ -12,8 +12,8 @@ import subprocess
 # CONSTANTS
 
 #lcd/camera
-WIDTH = 1024
-HEIGHT = 1024
+WIDTH = 1808
+HEIGHT = 1808
 BAUDRATE = 24000000
 FRAMERATE = 32
 LCD_WIDTH = 128
@@ -56,8 +56,8 @@ def initLCD():
         backlight=backlightPin,
         rotation=270,
         spi_speed_hz=BAUDRATE,
-        width=WIDTH,
-        height=HEIGHT,
+        width=LCD_WIDTH,
+        height=LCD_HEIGHT,
         offset_left=2,
         offset_top=3,
         invert=False
@@ -93,7 +93,8 @@ if __name__ == "__main__":
     while(True):
         if (state == WELCOME):
             print("WELCOME")
-            #TODO: create welcome screen
+            subprocess.call(["python", "textWrap.py", "welcome.txt"])
+            time.sleep(10)
             state = SCREEN_ON
 
         elif (state == LOW_POWER):

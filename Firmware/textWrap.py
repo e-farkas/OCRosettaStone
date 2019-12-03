@@ -40,7 +40,7 @@ img = Image.new('RGB', (WIDTH, HEIGHT), color=(0, 0, 0))
 
 draw = ImageDraw.Draw(img)
 
-font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 16)
+font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 14)
 
 size_x, size_y = draw.textsize(text_to_display, font)
 print("text size: " + str(size_x) + ", " + str(size_y))
@@ -53,12 +53,11 @@ ySpace = 0
 for word in words:
     wordIter = 0
     while len(word[wordIter:]) > charScreenWidth:
-        draw.text((5,10 + ySpace), word[wordIter:(wordIter + charScreenWidth)], font=font, fill=(255,0,0))
-        ySpace += 16
+        draw.text((5,10 + ySpace), word[wordIter:(wordIter + charScreenWidth)] + "-", font=font, fill=(255,0,0))
+        ySpace += 14
         wordIter = wordIter + charScreenWidth
-        #draw.text((10,20), MESSAGE2, font=font, fill=(255,0,0))
     draw.text((5,10 + ySpace), word[wordIter:], font=font, fill=(255,0,0))
-    ySpace += 16
+    ySpace += 14
 
 disp.display(img)
 time.sleep(0.1)
