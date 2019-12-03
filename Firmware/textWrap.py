@@ -8,8 +8,11 @@ import ST7735
 #MESSAGE = "Hello World! How are you today?"
 
 #The text to be displayed from 
-text_to_display = sys.argv[1]  
-MESSAGE2 = "how many chars"
+textFile = open(sys.argv[1], "r")
+text_to_display = textFile.read()
+
+#text_to_display = sys.argv[1]  
+#MESSAGE2 = "how many chars"
   # Create ST7735 LCD display class.
 disp = ST7735.ST7735(
     port = 0,
@@ -29,9 +32,9 @@ disp = ST7735.ST7735(
 # Initialize display.
 disp.begin()
 
-print("letters in string" + len(MESSAGE2))
+print("letters in string" + len(text_to_display))
 
-words = MESSAGE2.split()
+words = text_to_display.split("\n")
 
 WIDTH = disp.width
 HEIGHT = disp.height
@@ -41,17 +44,20 @@ textImg = ImageDraw.multiline_text()
   
 draw = ImageDraw.Draw(img)
   
-font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.tt    f", 20)
+font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 20)
   
-size_x, size_y = draw.textsize(MESSAGE2, font)
+size_x, size_y = draw.textsize(text_to_display, font)
 print("text size: " + size_x + size_y)
 
-while True:
-    draw.rectangle((0, 0, 160, 80), (0, 0, 0))
-    ySpace = 0;
-    for word in words:
-      draw.text((10,20 + ySpace), word, font=font, fill=(255,0,0))
-      ySpace += 20
+#while True:
+draw.rectangle((0, 0, 128, 128), (0, 0, 0))
+ySpace = 0;
+for word in words:
+  if len(word) > 8:
+    draw.text((10,20 + ySpace), word[], font=font, fill=(255,0,0))
+  else:
+    draw.text((10,20 + ySpace), word, font=font, fill=(255,0,0))
+    ySpace += 20
     #draw.text((10,20), MESSAGE2, font=font, fill=(255,0,0))
-    disp.display(img)
-    time.sleep(0.1)
+disp.display(img)
+time.sleep(0.1)

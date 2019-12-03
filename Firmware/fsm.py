@@ -16,6 +16,8 @@ WIDTH = 128
 HEIGHT = 128
 BAUDRATE = 24000000
 FRAMERATE = 32
+LCD_WIDTH = 128
+LCD_HEIGHT = 128
 
 SHUTDOWN_THRESH_S = 5
 
@@ -84,8 +86,8 @@ if __name__ == "__main__":
 
     #start state machine
     state = WELCOME
-    powerButtonHoldTime_s = 0
     backlight = False
+    powerButtonHoldTime_s = 0
     img = Image.new('RGB', (WIDTH,HEIGHT))
 
     while(True):
@@ -96,9 +98,9 @@ if __name__ == "__main__":
 
         elif (state == LOW_POWER):
             print("LOW_POWER")
-            #state = LOW_POWER
             #turn screen on
             disp.set_backlight(False)
+            time.sleep(0.3)  # need a little delay to remove finger from button
             if (powerButton.is_pressed):
                 state = SCREEN_ON
 
@@ -108,12 +110,12 @@ if __name__ == "__main__":
             for frame in camera.capture_continuous(rawCapture, format="rgb", use_video_port=True):
                 img = Image.fromarray(frame.array, "RGB")
                 disp.display(img)
-                #state = SCREEN_ON
                 rawCapture.truncate(0)
 
                 #capture image
                 if cameraButton.is_pressed:
                     state = CAPTURE_IMAGE
+                    break
                 #shutdown or turn screen on
                 if powerButton.is_pressed:
                     if((time.time() - powerButtonHoldTime_s) > SHUTDOWN_THRESH_S) and (powerButtonHoldTime_s > 0):
@@ -121,6 +123,7 @@ if __name__ == "__main__":
                     elif (powerButtonHoldTime_s == 0):  #change screen
                         powerButtonHoldTime_s = time.time()
                         state = LOW_POWER
+                    break
                 else:
                     powerButtonHoldTime_s = 0
 
