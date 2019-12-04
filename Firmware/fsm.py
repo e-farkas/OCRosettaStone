@@ -207,7 +207,7 @@ if __name__ == "__main__":
         elif(state == RUN_TRANSLATION):
             showDetTextTimeout_s = 0
             print("RUNNING TRANSLATION")
-            subprocess.call(["python", "../Translation/dictionaryMaker.py", "out.txt"])
+            subprocess.call(["python", "../Translate/client.py", "out.txt"])
             state = SHOW_TRANSLATION
         elif(state == SHOW_TRANSLATION):
             print("SHOWING TRANSLATION")
