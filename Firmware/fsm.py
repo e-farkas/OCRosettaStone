@@ -21,6 +21,7 @@ LCD_WIDTH = 128
 LCD_HEIGHT = 128
 
 SHUTDOWN_THRESH_S = 5
+DETTEXT_TIMEOUT_S = 10
 
 # PIN DEFINITIONS
 # buttons
@@ -126,6 +127,7 @@ if __name__ == "__main__":
     #start state machine
     state = WELCOME
     powerButtonHoldTime_s = 0
+    showDetTextTimeout_s = 0
     img = Image.new('RGB', (WIDTH,HEIGHT))
 
     while(True):
@@ -133,7 +135,7 @@ if __name__ == "__main__":
             print("WELCOME")
             disp.set_backlight(True)
             textWrap(disp, "welcome.txt")
-            time.sleep(10)
+            time.sleep(5)
             state = SCREEN_ON
 
         elif (state == LOW_POWER):
@@ -146,6 +148,7 @@ if __name__ == "__main__":
 
         elif(state == SCREEN_ON):
             print("SCREEN_ON")
+            showDetTextTimeout_s = 0
             disp.set_backlight(True)
             for frame in camera.capture_continuous(rawCapture, format="rgb", use_video_port=True):
                 img = Image.fromarray(frame.array, "RGB")
@@ -174,11 +177,12 @@ if __name__ == "__main__":
             print("CAPTURE_IMAGE")
             camera.capture("/home/pi/OCRosettaStone/Firmware/image.jpg")
             disp.display(img)
+            subprocess.call(["python3", "post_process.py"])
             state = RUN_OCR
 
         elif(state == RUN_OCR):
             print("RUN_OCR")
-            subprocess.call(["tesseract", "image.jpg", "out"])
+            subprocess.call(["tesseract", "thresh_image.jpg", "out"])
             subprocess.call(["python", "../OCR/text_process.py", "out.txt"])
             state = SHOW_DET_TEXT
 
@@ -186,18 +190,35 @@ if __name__ == "__main__":
             print("SHOW_DET_TEXT")
             subprocess.call(["cat", "out.txt"])
             textWrap(disp, "out.txt")
-            time.sleep(10)
-            state = SCREEN_ON
-        #elif(state == RUN_TRANSLATION):
+            
+            if showDetTextTimeout_s == 0:
+                showDetTextTimeout_s = time.time()
 
-        #elif(state == SHOW_TRANSLATION):
+            #capture image
+            if cameraButton.is_pressed:
+                print("PRESSED")
+                state = RUN_TRANSLATION
 
+            elif ((time.time() - showDetTextTimeout_s > DETTEXT_TIMEOUT_S) and (showDetTextTimeout_s > 0)):
+                state = SCREEN_ON
+            else:
+                state = SHOW_DET_TEXT
+
+        elif(state == RUN_TRANSLATION):
+            showDetTextTimeout_s = 0
+            print("RUNNING TRANSLATION")
+            subprocess.call(["python", "../Translation/dictionaryMaker.py", "out.txt"])
+            state = SHOW_TRANSLATION
+        elif(state == SHOW_TRANSLATION):
+            print("SHOWING TRANSLATION")
+            textWrap(disp, "translatedText.txt")
+            time.sleep(20)
+            state = LOW_POWER
         elif(state == SHUTDOWN):
             print("SHUTDOWN")
             disp.set_backlight(False)
             camera.close()
             subprocess.call(["sudo", "shutdown", "now"])
-            #TODO: shutdown from python
 
 #finally:
 #    camera.close()

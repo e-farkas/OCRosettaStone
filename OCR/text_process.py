@@ -16,7 +16,8 @@ with open(filepath, "w") as fp:
 file_str = ''
 with open(filepath) as fp:
     file_str = fp.read()
-    file_str = ''.join([i for i in file_str if i.isalnum() or i.isspace() ])
+    file_str = file_str.replace('\r', ' ').replace('\n', ' ')
+    file_str = ''.join([i for i in file_str if i.isalnum() or i.isspace()])
 
 with open(filepath, "w") as fp:
     fp.write(file_str)

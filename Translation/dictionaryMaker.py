@@ -7,7 +7,7 @@ spanish = []
 
 translation = {}
 
-with open('spanish2english.tsv') as tsvfile:
+with open('../Translation/spanish2english.tsv') as tsvfile:
     reader = csv.reader(tsvfile, delimiter='\t')
     # wordList = list(reader)
     for row in reader:
