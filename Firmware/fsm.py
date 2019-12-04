@@ -47,6 +47,19 @@ SHUTDOWN = 8
 
 #############################
 
+def isEmptyFile():
+
+    filepath = "out.txt"
+    if not os.path.isfile(filepath):
+        print("File does not exist")
+        sys.exit()
+
+    file_str = ''
+    with open(filepath) as fp:
+        file_str = fp.read()
+        return file_str.isspace())
+        
+    return True
 
 # initialize LCD screen
 def initLCD():
@@ -191,6 +204,9 @@ if __name__ == "__main__":
             subprocess.call(["cat", "out.txt"])
             textWrap(disp, "out.txt")
             
+            if(isEmptyFile()==True):
+                state = SCREEN_ON
+                break
             if showDetTextTimeout_s == 0:
                 showDetTextTimeout_s = time.time()
 
